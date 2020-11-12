@@ -1,0 +1,11 @@
+{
+  "domain": "zhijing_freshair",
+  "name": "Air Handling Uint",
+  "config_flow": true,
+  "documentation": "https://github.com/georgezhao2010/zhijing_freshair",
+  "dependencies": [],
+  "codeowners": [
+    "@georgezhao2010"
+  ],
+  "requirements": []
+}

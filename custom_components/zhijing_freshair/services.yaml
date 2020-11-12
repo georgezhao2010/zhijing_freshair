@@ -1,0 +1,9 @@
+set_mode:
+  description: Set the fan mode.
+  fields:
+    entity_id:
+      description: Name of the entities to set mode
+      example: "fan.living_room"
+    mode:
+      description: Mode for fan
+      example: "auto"

@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "device_exist": "The device exist, choice another one"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Host",
+                    "port": "Port"
+                },
+                "title": "Add Device"
+            }
+        }
+    }
+}

@@ -79,7 +79,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
 class FreshAirFan(FanEntity):
     def __init__(self, states_manager, host):
-        self._unique_id = "fan.{}".format(host)
+        self._unique_id = f"{DOMAIN}.{host}"
         self.entity_id = self._unique_id
         self._states_manager = states_manager
         self._state = STATE_UNKNOWN
@@ -102,9 +102,9 @@ class FreshAirFan(FanEntity):
     def device_info(self):
         return self._device_info
 
-    @property
+    """@property
     def device_class(self):
-        return "fan"
+        return "fan"""
 
     @property
     def name(self):

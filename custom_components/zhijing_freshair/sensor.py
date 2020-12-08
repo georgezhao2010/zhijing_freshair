@@ -33,8 +33,8 @@ _LOGGER = logging.getLogger(__name__)
 UNITS = {
     DEVICE_CLASS_TEMPERATURE: TEMP_CELSIUS,
     DEVICE_CLASS_HUMIDITY: PERCENTAGE,
-    DEVICE_CLASS_PM25: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER ,
-    DEVICE_CLASS_VOC: CONCENTRATION_PARTS_PER_MILLION ,
+    DEVICE_CLASS_PM25: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    DEVICE_CLASS_VOC: CONCENTRATION_PARTS_PER_MILLION,
     DEVICE_CLASS_FILTER: PERCENTAGE,
 }
 
@@ -68,7 +68,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class FreshairSensor(Entity):
     def __init__(self, states_manager, sensor_type, host):
         self._state = STATE_UNKNOWN
-        self._unique_id = "sensor.{}_{}".format(host, sensor_type)
+        self._unique_id = f"{DOMAIN}.{host}_{sensor_type}"
         self.entity_id = self._unique_id
         self._sensor_type = sensor_type
         self._device_info = DEVICE_INFO

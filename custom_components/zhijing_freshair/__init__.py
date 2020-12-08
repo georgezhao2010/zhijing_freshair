@@ -49,8 +49,8 @@ async def async_unload_entry(hass: HomeAssistant, config_entry):
 
     state_manager = hass.data[config_entry.entry_id][STATES_MANAGER]
     state_manager.close()
-    hass.data[DOMAIN].pop(config_entry.data[CONF_HOST])
-    if len(hass.data[DOMAIN]) == 0:
+    hass.data[DOMAIN][DEVICES].pop(config_entry.data[CONF_HOST])
+    if len(hass.data[DOMAIN][DEVICES]) == 0:
         hass.data.pop(DOMAIN)
     hass.data.pop(config_entry.entry_id)
 

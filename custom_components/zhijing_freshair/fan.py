@@ -31,8 +31,7 @@ from .const import (
     STATES_MANAGER,
     MODE_AUTO,
     MODE_MANUALLY,
-    MODE_TIMING,
-    DEVICE_INFO
+    MODE_TIMING
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -86,8 +85,12 @@ class FreshAirFan(FanEntity):
         self._mode = MODE_AUTO
         self._speed = SPEED_OFF
         self._icon = "mdi:fan"
-        self._device_info = DEVICE_INFO
-        self._device_info["identifiers"] = {(DOMAIN, host)}
+        self._device_info = {
+            "manufacturer": "BLAUBERG",
+            "model": "Komfort ERV D 150P V3",
+            "name": "George's Air Handling Unit",
+            "identifiers": {(DOMAIN, host)}
+        }
         self._states_manager.set_fan_update(self.update)
 
     @property
@@ -101,10 +104,6 @@ class FreshAirFan(FanEntity):
     @property
     def device_info(self):
         return self._device_info
-
-    """@property
-    def device_class(self):
-        return "fan"""
 
     @property
     def name(self):

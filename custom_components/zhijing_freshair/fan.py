@@ -83,8 +83,8 @@ class FreshAirFan(FanEntity):
         self.entity_id = self._unique_id
         self._states_manager = states_manager
         self._state = STATE_UNKNOWN
-        self._mode = STATE_UNKNOWN
-        self._speed = STATE_UNKNOWN
+        self._mode = MODE_AUTO
+        self._speed = SPEED_OFF
         self._icon = "mdi:fan"
         self._device_info = DEVICE_INFO
         self._device_info["identifiers"] = {(DOMAIN, host)}

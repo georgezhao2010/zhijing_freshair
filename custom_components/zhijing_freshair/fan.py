@@ -2,7 +2,6 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 import logging
 
-from typing import Optional
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     STATE_UNKNOWN,
@@ -21,8 +20,10 @@ from homeassistant.components.fan import (
     SPEED_MEDIUM,
     SPEED_HIGH,
     SUPPORT_SET_SPEED,
+    SUPPORT_PRESET_MODE,
     SERVICE_SET_SPEED,
-    ATTR_SPEED_LIST
+    ATTR_SPEED_LIST,
+    _fan_native
 )
 
 from .const import (
@@ -31,7 +32,8 @@ from .const import (
     STATES_MANAGER,
     MODE_AUTO,
     MODE_MANUALLY,
-    MODE_TIMING
+    MODE_TIMING,
+    DEVICE_INFO
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,7 +77,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         schema=SET_MODE_SCHEMA,
     )
 
-
 class FreshAirFan(FanEntity):
     def __init__(self, states_manager, host):
         self._unique_id = f"{DOMAIN}.{host}"
@@ -85,13 +86,9 @@ class FreshAirFan(FanEntity):
         self._mode = MODE_AUTO
         self._speed = SPEED_OFF
         self._icon = "mdi:fan"
-        self._device_info = {
-            "manufacturer": "BLAUBERG",
-            "model": "Komfort ERV D 150P V3",
-            "name": "George's Air Handling Unit",
-            "identifiers": {(DOMAIN, host)}
-        }
-        self._states_manager.set_fan_update(self.update)
+        self._device_info = DEVICE_INFO
+        self._device_info["identifiers"] = {(DOMAIN, host)}
+        self._states_manager.set_fan_update(self.update_status)
 
     @property
     def state(self):
@@ -148,7 +145,7 @@ class FreshAirFan(FanEntity):
     def should_poll(self):
         return False
 
-    def update(self, data: dict):
+    def update_status(self, data: dict):
         if ATTR_SPEED in data:
             self._speed = data[ATTR_SPEED]
         if ATTR_MODE in data:
@@ -162,14 +159,31 @@ class FreshAirFan(FanEntity):
     def set_mode(self, mode: str):
         self._states_manager.set_mode(mode)
 
-    async def async_set_speed(self, speed: str):
-        await self.hass.async_add_executor_job(self.set_speed, speed)
-
-    def set_speed(self, speed: str):
-        self._states_manager.set_speed(speed)
-
     def turn_on(self, speed: str, **kwargs) -> None:
         self._states_manager.turn_on()
 
     def turn_off(self, **kwargs) -> None:
         self._states_manager.turn_off()
+
+    @_fan_native
+    def set_speed(self, speed: str):
+        self._states_manager.set_speed(speed)
+
+    @_fan_native
+    async def async_set_speed(self, speed: str):
+        await self.hass.async_add_executor_job(self.set_speed, speed)
+
+    @_fan_native
+    def set_percentage(self, percentage: int) -> None:
+        speed = SPEED_HIGH
+        if percentage == 0:
+            speed = SPEED_OFF
+        elif percentage <= 33:
+            speed = SPEED_LOW
+        elif percentage <= 66:
+            speed = SPEED_MEDIUM
+        self.set_speed(speed)
+
+    @_fan_native
+    async def async_set_percentage(self, percentage: int) -> None:
+        await self.hass.async_add_executor_job(self.set_percentage, percentage)

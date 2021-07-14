@@ -12,3 +12,12 @@ DEVICE_CLASS_FILTER = "filter"
 MODE_AUTO = "auto"
 MODE_MANUALLY = "manually"
 MODE_TIMING = "timing"
+
+DEVICE_INFO = {
+            "manufacturer": "BLAUBERG",
+            "model": "Komfort ERV D 150P V3",
+            "name": "George's Air Handling Unit"
+}
+
+
+

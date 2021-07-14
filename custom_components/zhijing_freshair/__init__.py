@@ -19,10 +19,11 @@ from .statemanager import StateManager
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup(hass: HomeAssistant, hass_config: dict):
     hass.data.setdefault(DOMAIN, {})
-    _LOGGER.setLevel(logging.DEBUG)
     return True
+
 
 async def async_setup_entry(hass: HomeAssistant, config_entry):
     config = config_entry.data

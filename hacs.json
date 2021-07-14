@@ -1,5 +1,5 @@
 {
-    "name": "Air Handling Uint",
+    "name": "Zhijing Freshair",
     "domains": ["fan", "sensor"],
     "render_readme": true
 }

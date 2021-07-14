@@ -1,0 +1,5 @@
+{
+    "name": "Air Handling Uint",
+    "domains": ["fan", "sensor"],
+    "render_readme": true
+}

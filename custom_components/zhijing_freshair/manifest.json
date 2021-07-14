@@ -2,7 +2,7 @@
   "domain": "zhijing_freshair",
   "name": "Zhijing Freshair",
   "config_flow": true,
-  "version": "v0.6.3",
+  "version": "v0.6.4",
   "documentation": "https://github.com/georgezhao2010/zhijing_freshair",
   "issue_tracker": "https://github.com/georgezhao2010/zhijing_freshair/issues",
   "iot_class": "local_push",

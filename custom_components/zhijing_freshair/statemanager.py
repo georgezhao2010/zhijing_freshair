@@ -98,6 +98,7 @@ def byte_co_decode(byte):
         byte = byte + 0x30
     return byte
 
+
 class Timer(threading.Thread):
     def __init__(self, interval, function):
         threading.Thread.__init__(self)
@@ -138,7 +139,6 @@ class DeviceInterface(threading.Thread):
         self._get_data = request.build(MSG_TYPE_GET_DATA)
 
     def open(self, start_thread):
-        result = False
         with self._lock:
             if self._socket is None:
                 try:
@@ -163,12 +163,10 @@ class DeviceInterface(threading.Thread):
         with self._lock:
             if self._timer is not None:
                 self._timer.cancel()
-                self._timer.join()
                 self._timer = None
             if self._socket is not None:
                 if self._is_run:
                     self._is_run = False
-                    threading.Thread.join(self)
                 self._socket.close()
                 self._socket = None
 
@@ -274,6 +272,58 @@ class DeviceInterface(threading.Thread):
 
     def run(self):
         while self._is_run:
+            with self._lock:
+                while self._socket is None:
+                    try:
+                        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        self._socket.settimeout(5)
+                        self._socket.connect((self._host, self._port))
+                    except socket.timeout:
+                        self._socket.close()
+                        self._socket = None
+                        time.sleep(3)
+                    except socket.error:
+                        self._socket.close()
+                        self._socket = None
+                        time.sleep(3)
+                    if not self._is_run:
+                        self._socket.close()
+                        self._socket = None
+                        return
+            while self._is_run:
+                try:
+                    msg = self._socket.recv(1024)
+                    if not self._is_run:
+                        break
+                    msg_len = len(msg)
+                    if msg_len == 0:
+                        raise socket.error
+                    if msg_len == 97:  # 本地数据上报应有长度
+                        fan_state, sensor_state = self.read_state_message(msg)
+                        if len(fan_state) > 0:
+                            if not self._on_fan_state_changed(fan_state):
+                                self._is_on = None
+                                self._mode = None
+                                self._speed = None
+                        if len(sensor_state) > 0:
+                            if not self._on_sensor_state_changed(sensor_state):
+                                self._pm_25 = None
+                                self._voc = None
+                                self._temperature = None
+                                self._humidity = None
+                                self._filter = None
+                except socket.timeout:
+                    pass
+                except socket.error:
+                    _LOGGER.debug(f"Except socket.error {socket.error.errno} raised in socket.recv()")
+                    with self._lock:
+                        self._socket.close()
+                        self._socket = None
+                        break
+
+
+    """def run(self):
+        while self._is_run:
             try:
                 msg = self._socket.recv(1024)
                 if not self._is_run:
@@ -319,7 +369,8 @@ class DeviceInterface(threading.Thread):
                     except socket.timeout:
                         pass
                     except socket.error:
-                        pass
+                        pass"""
+
 
 class StateManager(threading.Thread):
     def __init__(self, host, port):

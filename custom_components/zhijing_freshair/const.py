@@ -13,6 +13,12 @@ MODE_AUTO = "auto"
 MODE_MANUALLY = "manually"
 MODE_TIMING = "timing"
 
+SPEED_OFF = "off"
+SPEED_LOW = "low"
+SPEED_MEDIUM = "medium"
+SPEED_HIGH = "high"
+ATTR_SPEED = "speed"
+
 DEVICE_INFO = {
             "manufacturer": "BLAUBERG",
             "model": "Komfort ERV D 150P V3",

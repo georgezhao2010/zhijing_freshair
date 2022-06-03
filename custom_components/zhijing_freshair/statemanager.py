@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import logging
+import binascii
 
 from .const import (
     DEVICE_CLASS_PM25,
@@ -10,6 +11,11 @@ from .const import (
     MODE_AUTO,
     MODE_MANUALLY,
     MODE_TIMING,
+    SPEED_OFF,
+    SPEED_LOW,
+    SPEED_MEDIUM,
+    SPEED_HIGH,
+    ATTR_SPEED
 )
 
 from homeassistant.const import (
@@ -21,27 +27,6 @@ from homeassistant.const import (
     ATTR_STATE,
     ATTR_ICON
 )
-
-from homeassistant.components.fan import (
-    SPEED_OFF,
-    SPEED_LOW,
-    SPEED_MEDIUM,
-    SPEED_HIGH,
-    ATTR_SPEED
-)
-
-"""DEVICE_CLASS_HUMIDITY = "humidity"
-DEVICE_CLASS_TEMPERATURE = "temperature"
-STATE_ON = "on"
-STATE_OFF = "off"
-ATTR_MODE = "mode"
-ATTR_STATE = "state"
-ATTR_ICON = "icon"
-SPEED_OFF = "off"
-SPEED_LOW = "low"
-SPEED_MEDIUM = "medium"
-SPEED_HIGH = "high"
-ATTR_SPEED = "speed"""
 
 MSG_TYPE_GET_DATA = bytearray([0x31, 0x31, 0x30, 0x32])
 MSG_TYPE_TURN_OFF = bytearray([0x32, 0x31, 0x30, 0x33])
@@ -116,6 +101,7 @@ class Timer(threading.Thread):
                 self._function()
         self._finished.set()
 
+
 class DeviceInterface(threading.Thread):
     def __init__(self, host, port, on_fan_state_changed, on_sensor_state_changed):
         threading.Thread.__init__(self)
@@ -171,6 +157,7 @@ class DeviceInterface(threading.Thread):
                 self._socket = None
 
     def send(self, msg):
+        _LOGGER.debug(f"Send {binascii.hexlify(msg)}")
         with self._lock:
             try:
                 self._socket.send(msg)
@@ -293,6 +280,7 @@ class DeviceInterface(threading.Thread):
             while self._is_run:
                 try:
                     msg = self._socket.recv(1024)
+                    _LOGGER.debug(f"Received {binascii.hexlify(msg)}")
                     if not self._is_run:
                         break
                     msg_len = len(msg)
@@ -300,6 +288,7 @@ class DeviceInterface(threading.Thread):
                         raise socket.error
                     if msg_len == 97:  # 本地数据上报应有长度
                         fan_state, sensor_state = self.read_state_message(msg)
+                        _LOGGER.debug(f"fan_state = {fan_state}, sensor_state = {sensor_state}")
                         if len(fan_state) > 0:
                             if not self._on_fan_state_changed(fan_state):
                                 self._is_on = None
@@ -322,57 +311,7 @@ class DeviceInterface(threading.Thread):
                         break
 
 
-    """def run(self):
-        while self._is_run:
-            try:
-                msg = self._socket.recv(1024)
-                if not self._is_run:
-                    break
-                msg_len = len(msg)
-                if msg_len == 0:
-                    raise socket.error
-
-                if msg_len == 97:  # 本地数据上报应有长度
-                    fan_state, sensor_state = self.read_state_message(msg)
-                    if len(fan_state) > 0:
-                        if not self._on_fan_state_changed(fan_state):
-                            self._is_on = None
-                            self._mode = None
-                            self._speed = None
-                    if len(sensor_state) > 0:
-                        if not self._on_sensor_state_changed(sensor_state):
-                            self._pm_25 = None
-                            self._voc = None
-                            self._temperature = None
-                            self._humidity = None
-                            self._filter = None
-
-            except socket.timeout:
-                pass
-            except socket.error:
-                counter = 0
-                while self._is_run:
-                    counter = counter + 1
-                    try:
-                        if counter >= 100:
-                            _LOGGER.warning("failed to connect air handling uint at {}:{} above 100 times",
-                                            self._host, self._port)
-                            counter = 0
-                        time.sleep(3)
-                        with self._lock:
-                            self._socket.close()
-                            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            self._socket.settimeout(3)
-                            self._socket.connect((self._host, self._port))
-                            counter = 0
-                        break
-                    except socket.timeout:
-                        pass
-                    except socket.error:
-                        pass"""
-
-
-class StateManager(threading.Thread):
+class StateManager:
     def __init__(self, host, port):
         self._device = DeviceInterface(host, port, self.on_fan_state_changed, self.on_sensor_state_changed)
         self._sensor_updates = {}

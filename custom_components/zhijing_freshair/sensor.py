@@ -56,6 +56,7 @@ SENSOR_TYPES = [
     DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_HUMIDITY, DEVICE_CLASS_PM25, DEVICE_CLASS_VOC, DEVICE_CLASS_FILTER
 ]
 
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     sensors = []
     states_manager = hass.data[config_entry.entry_id][STATES_MANAGER]
@@ -64,6 +65,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         sensors.append(sensor)
 
     async_add_entities(sensors)
+
 
 class FreshairSensor(Entity):
     def __init__(self, states_manager, sensor_type, host):
@@ -74,7 +76,7 @@ class FreshairSensor(Entity):
         self._device_info = DEVICE_INFO
         self._device_info["identifiers"] = {(DOMAIN, host)}
 
-        states_manager.add_sensor_update(sensor_type, self.update)
+        states_manager.add_sensor_update(sensor_type, self.update_status)
 
     @property
     def state(self):
@@ -108,6 +110,6 @@ class FreshairSensor(Entity):
     def icon(self):
         return ICONS.get(self._sensor_type)
 
-    def update(self, state):
+    def update_status(self, state):
         self._state = state
         self.schedule_update_ha_state()

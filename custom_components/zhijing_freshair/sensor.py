@@ -112,4 +112,7 @@ class FreshairSensor(Entity):
 
     def update_status(self, state):
         self._state = state
-        self.schedule_update_ha_state()
+        try:
+            self.schedule_update_ha_state()
+        except Exception:
+            pass

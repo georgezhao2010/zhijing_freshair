@@ -38,16 +38,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SERVICE_SET_MODE = "set_mode"
-ATTR_MODE_LIST = "mode_list"
-
-SET_MODE_SCHEMA = vol.Schema(
-    {
-        vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-        vol.Required(ATTR_MODE): cv.string,
-    }
-)
-
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     states_manager = hass.data[config_entry.entry_id][STATES_MANAGER]
@@ -83,6 +73,7 @@ class FreshAirFan(FanEntity):
             speed = SPEED_MEDIUM
         else:
             speed = SPEED_HIGH
+        _LOGGER.debug(f"set speed to {speed}")
         self.set_speed(speed)
 
     async def async_set_percentage(self, percentage: int) -> None:
@@ -171,7 +162,6 @@ class FreshAirFan(FanEntity):
 
     @property
     def state_attributes(self) -> dict:
-        """Return optional state attributes."""
         data: dict[str, float | str | None] = {}
         data[ATTR_PERCENTAGE] = self.percentage
         data[ATTR_PERCENTAGE_STEP] = self.percentage_step
@@ -191,7 +181,10 @@ class FreshAirFan(FanEntity):
             self._state = data[ATTR_STATE]
         if ATTR_ICON in data:
             self._icon = data[ATTR_ICON]
-        self.schedule_update_ha_state()
+        try:
+            self.schedule_update_ha_state()
+        except Exception:
+            pass
 
     def turn_on(
             self,
